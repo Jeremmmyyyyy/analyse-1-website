@@ -31,6 +31,7 @@ import 'moment/src/locale/fr-ch';
 
 let currentQuestions = [];
 let currentSort = Sort.DATE;
+let currentSearch = '';
 let currentPage = 1;
 let savedScrollPosition = 0;
 let numberOfPages;
@@ -150,20 +151,21 @@ function handleApiError(error) {
     return null;
 }
 
-function buildUrlParams(page, sort, showBookmarks) {
+function buildUrlParams(page, sort, showBookmarks, search) {
     const params = new URLSearchParams();
     
     if (page) params.set('page', page);
     if (sort) params.set('sort', sort);
     if (showBookmarks) params.set('bookmarked-questions', 'true');
+    if (search) params.set('search', search);
     
     const paramString = params.toString();
     return paramString ? `?${paramString}` : '';
 }
 
-async function fetchQuestions(questionLocation, pageId, divId, page, sort, showBookmarks) {
+async function fetchQuestions(questionLocation, pageId, divId, page, sort, showBookmarks, search) {
     const baseUrl = buildQuestionsUrl(questionLocation, pageId, divId);
-    const params = buildUrlParams(page, sort, showBookmarks);
+    const params = buildUrlParams(page, sort, showBookmarks, search);
     const url = `${baseUrl}${params}`;
 
     try {
@@ -379,6 +381,20 @@ async function checkNewQuestionEligibility(questionLocation) {
     return isUserAuthenticated(authData) && await getFeatureFlag('newQuestion');
 }
 
+function setupSearchInput(topBar, questionsBody, questionLocation, divId) {
+    const searchInput = topBar.querySelector('#search-questions');
+    let timeoutId;
+
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            currentSearch = e.target.value;
+            currentPage = 1;
+            loadQuestionCards(questionsBody, questionLocation, divId, false);
+        }, 300);
+    });
+}
+
 async function setupTopBar(questionsBodyElement, questionsBody, questionLocation, divId) {
     if (questionsBodyElement.querySelector('.top-bar')) {
         return;
@@ -387,6 +403,7 @@ async function setupTopBar(questionsBodyElement, questionsBody, questionLocation
     const topBar = createTopBar(questionsBodyElement, questionLocation);
     setupSortDropdown(topBar, questionsBody, questionLocation, divId);
     setupBookmarksButton(topBar, questionsBody, questionLocation, divId);
+    setupSearchInput(topBar, questionsBody, questionLocation, divId);
     
     const canAddNewQuestion = await checkNewQuestionEligibility(questionLocation);
     if (canAddNewQuestion && !questionsBodyElement.querySelector('.new-question-button')) {
@@ -434,7 +451,7 @@ async function loadQuestionCards(questionsBody, questionLocation, divId = '', cr
     const pageId = getPageId(questionLocation);
     const showBookmarks = shouldShowBookmarks(questionsBodyElement, questionLocation);
     
-    const questions = await fetchQuestions(questionLocation, pageId, divId, currentPage, currentSort, showBookmarks);
+    const questions = await fetchQuestions(questionLocation, pageId, divId, currentPage, currentSort, showBookmarks, currentSearch);
     currentQuestions = questions || [];
     
     if (questions === null) {

@@ -93,4 +93,13 @@ function updatePreview(textarea, preview, previewBody, previewBodyText) {
   }
 }
 
-export {getFileName, Sort, QuestionLocation, UserRole, escapeHTML, processLineBreaks, updatePreview};
+function fixLLMHtml(content) {
+  // Regular expression to match both inline and block LaTeX content
+  const regex = /\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\]|\$\$[\s\S]*?\$\$/g;
+
+  return content.replace(regex, (match) => {
+    return match.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  });
+}
+
+export {getFileName, Sort, QuestionLocation, UserRole, escapeHTML, processLineBreaks, updatePreview, fixLLMHtml};

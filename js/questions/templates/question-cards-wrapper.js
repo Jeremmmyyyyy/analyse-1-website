@@ -18,6 +18,7 @@ const questionCardsTopBarTemplate = (Sort, bookmarksButton) => `
             <li><a class="dropdown-item" data-sort="${Sort.ANSWERS}" href="#">Le plus de réponses</a></li>
             <li><a class="dropdown-item" data-sort="${Sort.NO_ANSWER}" href="#">Sans réponse</a></li>
         </ul>
+        <input type="text" class="form-control d-inline-block w-auto ms-2" id="search-questions" placeholder="Rechercher...">
         <a role="button" class="website-info" data-bs-toggle="popover" data-bs-content="Un problème? Une suggestion?<br><a href='mailto:support-technique.analyse@groupes.epfl.ch'>Alors contactez-nous ici!</a>"></a>
         ${bookmarksButton ? `<div><input class="form-check-input me-1" type="checkbox" value="" id="bookmarksButton"><label class="form-check-label" for="bookmarksButton">Voir mes questions enregistrées</label></div>` : ''}
     </div>

@@ -12,7 +12,7 @@ import {
     answerEditFormTemplate,
 } from './templates/question-view.js';
 import {QuestionLocation, updatePreview, UserRole} from './utils';
-import {processLineBreaks} from './utils';
+import {processLineBreaks, fixLLMHtml} from './utils';
 
 import moment from 'moment/src/moment';
 import 'moment/src/locale/fr-ch';
@@ -727,7 +727,13 @@ function setupAnswerPermissions(answer, userRole, userIsAdmin) {
 function formatAnswerData(answer) {
     answer.date = moment(answer.date).fromNow();
     answer.user_badge = getUserBadge(answer.user_role, answer.is_op, answer.endorsed_assistant);
-    answer.formatted_body = processLineBreaks(answer.body);
+
+    if (answer.user_role === UserRole.LLM){
+        answer.formatted_body =  fixLLMHtml(answer.body);
+    }
+    else{
+        answer.formatted_body = processLineBreaks(answer.body);
+    }
 }
 
 function initializeAnswerOptions(answerElement, questionId) {
