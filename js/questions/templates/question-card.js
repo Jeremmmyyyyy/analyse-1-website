@@ -21,13 +21,33 @@ const questionCardTemplate = (question) => {
                 <p class="question-date">${question.user_is_author ? 'vous, ' : ''}${question.relativeDate}</p>
             </div>
             <div class="question-comments-likes">
-                <div class="question-resolved-locked">
-                    ${question.resolved ? `<div class="question-resolved"></div>` : ''}
-                    ${question.locked ? `<div class="question-locked"></div>` : ''}
-                    ${question.has_llm_answer ? `<div class="question-llm-answer" title="Cette question a une réponse générée par IA"></div>` : ''}
-                </div>
-                <div class="question-comments">${question.answers}</div>
                 <div class="question-likes ${question.likes > 0 ? 'liked' : ''}">${question.likes}</div>
+                <div class="question-answers-icons">
+                    ${question.student_answers > 0 ? `
+                        <div class="answer-icon student-icon" title="Réponse d'étudiant">
+                            ${question.student_accepted ? '<div class="icon-badge accepted"></div>' : ''}
+                            ${question.student_liked ? '<div class="icon-badge liked"></div>' : ''}
+                        </div>
+                    ` : ''}
+                    ${question.assistant_answers > 0 ? `
+                        <div class="answer-icon assistant-icon" title="Réponse d'assistant">
+                            ${question.assistant_accepted ? '<div class="icon-badge accepted"></div>' : ''}
+                            ${question.assistant_liked ? '<div class="icon-badge liked"></div>' : ''}
+                        </div>
+                    ` : ''}
+                    ${question.llm_answers > 0 ? `
+                        <div class="answer-icon bot-icon" title="Réponse de Bot-afogo">
+                            ${question.llm_accepted ? '<div class="icon-badge accepted"></div>' : ''}
+                            ${question.llm_liked ? '<div class="icon-badge liked"></div>' : ''}
+                        </div>
+                    ` : ''}
+                    ${question.teacher_answers > 0 ? `
+                        <div class="answer-icon teacher-icon" title="Réponse du professeur">
+                            ${question.teacher_accepted ? '<div class="icon-badge accepted"></div>' : ''}
+                            ${question.teacher_liked ? '<div class="icon-badge liked"></div>' : ''}
+                        </div>
+                    ` : ''}
+                </div>
             </div>
         </div>
     </div>

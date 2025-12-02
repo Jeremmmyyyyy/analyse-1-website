@@ -28,38 +28,6 @@
     @extend .mb-1;
   }
 
-  .question-resolved-locked {
-    @extend .d-inline;
-    @extend .me-2;
-  }
-
-  .question-resolved {
-    @extend .d-inline;
-    @extend .text-success;
-
-    &:before {
-      @include icon('\F633');
-    }
-  }
-
-  .question-locked {
-    @extend .d-inline;
-
-    &:before {
-      @include icon('\F47A');
-      @extend .ms-1;
-    }
-  }
-
-  .question-llm-answer {
-    @extend .d-inline;
-
-    &:before {
-      @include icon('\F6B1');
-      @extend .ms-1;
-    }
-  }
-
   .question-author-date {
     @extend .me-2;
   }
@@ -81,32 +49,105 @@
   }
 
   .question-comments-likes {
-    @extend .text-end;
+    @extend .d-flex;
+    @extend .align-items-center;
+    @extend .justify-content-end;
     @extend .text-secondary;
-  }
-
-  .question-comments {
-    @extend .d-inline;
-    @extend .me-2;
-
-    &:before {
-      @include icon('\F24B');
-      @extend .me-1;
-    }
+    gap: 1rem;
   }
 
   .question-likes {
-    @extend .d-inline;
+    @extend .d-inline-flex;
+    @extend .align-items-center;
 
     &:before {
-      @include icon('\F415');
+      @include icon('\F417');
       @extend .me-1;
     }
 
     &.liked {
       @extend .text-danger;
+      &:before {
+        @include icon('\F415');
+      }
     }
   }
+
+  .question-answers-icons {
+    @extend .d-flex;
+    @extend .align-items-center;
+    gap: 0.5rem;
+  }
+
+  .answer-icon {
+    position: relative;
+    font-size: 1.2rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .student-icon {
+    &:before {
+        @include icon('\F8DF');
+        color: #6c757d;
+    }
+  }
+
+  .assistant-icon {
+    &:before {
+        @include icon('\F4DB');
+        color: #198754;
+    }
+  }
+
+  .bot-icon {
+    &:before {
+        @include icon('\F6B1');
+        color: #d63384;
+    }
+  }
+
+  .teacher-icon {
+    &:before {
+        @include icon('\F6FD');
+        color: #fd7e14;
+    }
+  }
+
+  .icon-badge {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    background-color: white;
+    border-radius: 50%;
+    padding: 0;
+    line-height: 1;
+    
+    &.accepted {
+        bottom: -0.3rem;
+        right: -0.3rem;
+        color: #198754;
+        &:before {
+            @include icon('\F26B');
+            top: 0;
+        }
+    }
+
+    &.liked {
+        top: -0.3rem;
+        right: -0.3rem;
+        color: #dc3545;
+        &:before {
+            @include icon('\F415');
+            top: 0;
+        }
+    }
+  }
+
 }
 
 .top-bar {
