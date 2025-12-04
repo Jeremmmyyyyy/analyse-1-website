@@ -36,5 +36,13 @@ export default [
       //sourcemap: true
     },
     plugins: [terser({format: {comments: false}})]
+  },
+  {
+    input: 'js/chatbot.js',
+    output: {
+      file: 'dist/js/chatbot.js',
+      format: 'iife',
+    },
+    plugins: [terser({format: {comments: false}})]
   }
 ]

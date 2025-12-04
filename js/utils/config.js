@@ -12,6 +12,7 @@ let featureFlags = {
   authentication: false,
   questions: false,
   newQuestion: false,
+  chatbot: false,
 }
 
 export {baseUrl, supportEmail, featureFlags};

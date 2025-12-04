@@ -22,7 +22,9 @@ async function fetchFeatureFlags() {
         featureFlags[item.name] = item.enabled === 1;
       }
     });
-  } catch (error) {}
+  } catch (error) {
+    console.error('Failed to fetch feature flags:', error);
+  }
 
   // Store feature flags in session storage
   sessionStorage.setItem(sessionStorageKey, JSON.stringify(featureFlags));

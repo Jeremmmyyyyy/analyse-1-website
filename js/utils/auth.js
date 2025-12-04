@@ -4,6 +4,8 @@
 
 import axios from 'axios';
 import {baseUrl} from './config';
+import {initChatbot} from './chatbot-init.js';
+import {getFeatureFlag} from './feature-flags.js';
 
 // Constants
 const AUTH_STATUS = {
@@ -405,6 +407,13 @@ async function authentication() {
   }
 
   const authButton = createAuthButtonForResult(result, usernameDiv);
+
+  if (result !== AUTH_STATUS.UNAUTHORIZED) {
+    const showChatbot = await getFeatureFlag('chatbot');
+    if (showChatbot) {
+      initChatbot(result.name);
+    }
+  }
 
   const sidebarMenuFooter = document.querySelector('.had-footer');
   if (sidebarMenuFooter && authButton) {
