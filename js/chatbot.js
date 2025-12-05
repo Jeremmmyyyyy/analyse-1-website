@@ -14,6 +14,21 @@
   };
 
   // Utils
+  function getToken() {
+    const cookieToken = document.cookie.split('; ').find(row => row.startsWith('token='));
+    return cookieToken ? cookieToken.split('=')[1] : null;
+  }
+
+  function decodeJWT(token) {
+    try {
+      const payload = token.split('.')[1];
+      const decoded = JSON.parse(atob(payload));
+      return decoded;
+    } catch (error) {
+      return null;
+    }
+  }
+
   function hexToRgb(hex) {
     try {
       let h = String(hex).replace("#", "");
@@ -1273,6 +1288,15 @@
   function buildRequest(messageText, sendFiles) {
     // Extract course name from section (the display text is now the section name, send it directly)
     const topicToSend = topic || undefined;
+
+    // Get Sciper
+    const token = getToken();
+    const userData = token ? decodeJWT(token) : null;
+    const sciper = userData ? userData.sciper : undefined;
+
+    // Get only the last message
+    const fullHistory = buildHistory();
+    const messagesToSend = fullHistory.length > 0 ? [fullHistory[fullHistory.length - 1]] : [];
     
     // If we have attachments, send multipart/form-data; otherwise JSON
     if (sendFiles && sendFiles.length > 0) {
@@ -1280,18 +1304,17 @@
       // fd.append('message', messageText); // Removed to avoid duplication
       fd.append('sessionId', sessionId);
       if (topicToSend) fd.append('topic', topicToSend);
+      if (sciper) fd.append('sciper', sciper);
       fd.append('answer', answerMode);
-      const messages = buildHistory();
-      try { fd.append('messages', JSON.stringify(messages)); } catch {}
+      try { fd.append('messages', JSON.stringify(messagesToSend)); } catch {}
       sendFiles.forEach((f, i) => fd.append('files', f, f.name || `file_${i}`));
       return {
         body: fd,
         headers: { 'Accept': 'application/json' },
       };
     } else {
-      const messages = buildHistory();
       return {
-        body: JSON.stringify({ sessionId, topic: topicToSend, answer: answerMode, messages }),
+        body: JSON.stringify({ sessionId, topic: topicToSend, answer: answerMode, messages: messagesToSend, sciper }),
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       };
     }
