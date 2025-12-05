@@ -398,6 +398,18 @@
 .cbw-copybtn:hover { background: #4b5563; }
 .cbw-text blockquote { margin: 8px 0; padding: 0 0 0 12px; border-left: 3px solid #d1d5db; opacity: .85; font-style: italic; }
 .cbw-row.user .cbw-text blockquote { border-left-color: rgba(255,255,255,0.4); }
+ 
+/* Context Visuals */
+.cbw-bubble { position: relative; }
+.cbw-bubble::after { content: ''; position: absolute; bottom: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; display: none; z-index: 1; }
+.cbw-row.in-context .cbw-bubble::after { display: block; background: #22c55e; box-shadow: 0 0 0 2px #fff; }
+.cbw-row.out-context .cbw-bubble::after { display: block; background: #ef4444; box-shadow: 0 0 0 2px #fff; }
+
+/* Dark mode adjustments for dots */
+.cbw-panel.dark-theme .cbw-row.in-context .cbw-bubble::after,
+.cbw-panel.dark-theme .cbw-row.out-context .cbw-bubble::after { box-shadow: 0 0 0 2px #374151; }
+.cbw-panel.dark-theme .cbw-row.user.in-context .cbw-bubble::after,
+.cbw-panel.dark-theme .cbw-row.user.out-context .cbw-bubble::after { box-shadow: 0 0 0 2px var(--cbw-accent); }
 
 /* Math - prevent overflow */
 .cbw-text .cbw-math { display: inline-block; max-width: 100%; overflow-x: auto; overflow-y: hidden; }
@@ -471,7 +483,7 @@
 .cbw-hint { text-align: center; font-size: 11px; opacity: 0.5; letter-spacing: .3px; user-select: none; color: #6b7280; }
 
 /* Modal (answer choice) */
-.cbw-modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px; overflow-y: auto; }
+.cbw-modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px; overflow-y: auto; z-index: 100; }
 .cbw-modal { width: 100%; max-width: 340px; background: #fff; color: #1f2937; border: 1px solid #e5e5e5; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); padding: 18px; display: flex; flex-direction: column; gap: 14px; max-height: 70vh; overflow-y: auto; margin: auto; }
 .cbw-modal h3 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
 .cbw-modal p { margin: 0; opacity: 0.7; font-size: 14px; line-height: 1.5; }
@@ -484,6 +496,23 @@
 .cbw-choice:focus { outline: 2px solid rgba(var(--cbw-accent-rgb),0.5); outline-offset: 2px; }
 .cbw-modal .cbw-cancel { align-self: center; background: transparent; border: 1px solid #d1d5db; color: #6b7280; border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; opacity: 1; transition: all .2s; }
 .cbw-modal .cbw-cancel:hover { border-color: #9ca3af; color: #1f2937; background: #f9fafb; }
+
+/* Info Modal */
+.cbw-info-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #e5e5e5; }
+.cbw-info-icon { width: 48px; height: 48px; background: var(--cbw-accent); border-radius: 12px; display: grid; place-items: center; color: #fff; flex-shrink: 0; }
+.cbw-info-title { font-size: 18px; font-weight: 700; color: #1f2937; }
+.cbw-info-body { display: flex; flex-direction: column; gap: 12px; }
+.cbw-info-item { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: #4b5563; }
+.cbw-info-dot-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4b5563; margin-top: 4px; }
+.cbw-info-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.cbw-info-dot.green { background: #22c55e; }
+.cbw-info-dot.red { background: #ef4444; }
+
+/* Dark theme adjustments for Info Modal */
+.cbw-panel.dark-theme .cbw-info-header { border-bottom-color: #374151; }
+.cbw-panel.dark-theme .cbw-info-title { color: #f3f4f6; }
+.cbw-panel.dark-theme .cbw-info-item { color: #d1d5db; }
+.cbw-panel.dark-theme .cbw-info-dot-row { color: #9ca3af; }
 
 /* Topic Modal */
 .cbw-topic-modal { max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
@@ -624,6 +653,22 @@
   closeBtn.className = "cbw-iconbtn"; closeBtn.setAttribute("aria-label", "Close");
   closeBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M3.7 3.7a1 1 0 0 1 1.4 0L8 6.6l2.9-2.9a1 1 0 1 1 1.4 1.4L9.4 8l2.9 2.9a1 1 0 1 1-1.4 1.4L8 9.4l-2.9 2.9a1 1 0 1 1-1.4-1.4L6.6 8 3.7 5.1a1 1 0 0 1 0-1.4z"/></svg>`;
 
+  // Info Button
+  const infoBtn = document.createElement("button");
+  infoBtn.className = "cbw-iconbtn"; infoBtn.setAttribute("aria-label", "Information");
+  infoBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+  infoBtn.addEventListener("click", () => showInfoModal());
+
+  // Reset Button
+  const resetBtn = document.createElement("button");
+  resetBtn.className = "cbw-iconbtn"; resetBtn.setAttribute("aria-label", "Reset conversation");
+  resetBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`;
+  resetBtn.addEventListener("click", () => {
+    if(confirm("Are you sure you want to reset the conversation?")) {
+      resetConversation();
+    }
+  });
+
   const themeBtn = document.createElement("button");
   themeBtn.className = "cbw-iconbtn cbw-theme-btn"; themeBtn.setAttribute("aria-label", "Toggle dark/light theme");
   const updateThemeIcon = () => {
@@ -643,6 +688,8 @@
 
   header.appendChild(titleEl);
   const spacer = document.createElement("div"); spacer.className = "cbw-spacer"; header.appendChild(spacer);
+  header.appendChild(infoBtn);
+  header.appendChild(resetBtn);
   header.appendChild(themeBtn);
   header.appendChild(expandBtn);
   header.appendChild(closeBtn);
@@ -1006,7 +1053,7 @@
 
   // State
   let isLoading = false;
-  const sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  let sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
   const messages = [];
   const attachments = []; // { file: File, url?: string, kind: 'image'|'pdf'|'other' }
 
@@ -1153,7 +1200,7 @@
     }
 
     if (cfg.showTimestamps) { const time = document.createElement("div"); time.className = "cbw-time"; time.textContent = formatTime(ts); bubble.appendChild(time); }
-    row.appendChild(bubble); messagesEl.appendChild(row); scrollToBottom();
+    row.appendChild(bubble); messagesEl.appendChild(row); scrollToBottom(); updateContextVisuals();
     // Enhance after attached to DOM to avoid timing issues
     const contentNode = bubble.querySelector('.cbw-text');
     if (contentNode) {
@@ -1380,6 +1427,77 @@
       while (attachments.length) { const a = attachments.pop(); if (a?.url) URL.revokeObjectURL(a.url); }
       updateFileListUI(); updateAttachBadge();
       isLoading = false; sendBtn.disabled = false; renderEmptyIfNeeded();
+      updateContextVisuals();
     }
+  }
+
+  function resetConversation() {
+    messages.length = 0;
+    messagesEl.innerHTML = '';
+    sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    renderEmptyIfNeeded();
+    while (attachments.length) { const a = attachments.pop(); if (a?.url) URL.revokeObjectURL(a.url); }
+    updateFileListUI();
+    updateAttachBadge();
+  }
+
+  function showInfoModal() {
+    const infoModalBackdrop = document.createElement('div');
+    infoModalBackdrop.className = 'cbw-modal-backdrop';
+    infoModalBackdrop.style.display = 'flex'; // Make it visible
+    const infoModal = document.createElement('div');
+    infoModal.className = 'cbw-modal';
+    infoModal.innerHTML = `
+      <div class="cbw-info-header">
+        <div class="cbw-info-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M12 22a2 2 0 0 1 2-2v-2a2 2 0 0 1-2-2 2 2 0 0 1-2 2v2a2 2 0 0 1 2 2z"/><path d="M2 12a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2 2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/><path d="M22 12a2 2 0 0 1-2-2h-2a2 2 0 0 1-2 2 2 2 0 0 1 2 2h2a2 2 0 0 1 2-2z"/><rect x="8" y="8" width="8" height="8" rx="2"/></svg>
+        </div>
+        <div class="cbw-info-title">Assistant Analyse I</div>
+      </div>
+      <div class="cbw-info-body">
+        <div class="cbw-info-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>Ce chatbot est en version bêta. Les réponses peuvent contenir des erreurs et ne doivent pas être considérées comme une vérité absolue.</span>
+        </div>
+        <div class="cbw-info-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>En cas de problème ou de doute, veuillez contacter le professeur ou les assistants.</span>
+        </div>
+        <div class="cbw-info-item" style="flex-direction:column; gap:8px;">
+          <span><strong>Mémoire du chatbot :</strong></span>
+          <div class="cbw-info-dot-row">
+            <div class="cbw-info-dot green"></div>
+            <span>En mémoire (5 derniers échanges)</span>
+          </div>
+          <div class="cbw-info-dot-row">
+            <div class="cbw-info-dot red"></div>
+            <span>Oublié (hors contexte)</span>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="cbw-cancel" style="margin-top:12px; width:100%;">Fermer</button>
+    `;
+    infoModalBackdrop.appendChild(infoModal);
+    panel.appendChild(infoModalBackdrop);
+    
+    const close = () => infoModalBackdrop.remove();
+    infoModal.querySelector('.cbw-cancel').addEventListener('click', close);
+    infoModalBackdrop.addEventListener('click', (e) => { if(e.target === infoModalBackdrop) close(); });
+  }
+
+  function updateContextVisuals() {
+    const rows = Array.from(messagesEl.querySelectorAll('.cbw-row'));
+    rows.forEach(r => {
+      r.classList.remove('in-context');
+      r.classList.remove('out-context');
+    });
+    
+    // Last 10 messages are in context
+    const contextRows = rows.slice(-10);
+    contextRows.forEach(r => r.classList.add('in-context'));
+    
+    // Others are out of context
+    const outContextRows = rows.slice(0, -10);
+    outContextRows.forEach(r => r.classList.add('out-context'));
   }
 })();
