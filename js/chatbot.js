@@ -376,7 +376,7 @@
 
 .cbw-bubble { max-width: 85%; background: #f3f4f6; border: none; padding: 10px 14px; border-radius: 14px; line-height: 1.5; font-size: 15px; display: flex; flex-direction: column; gap: 8px; word-break: break-word; animation: cbw-fade-in .3s ease; color: #1f2937; overflow: hidden; }
 .cbw-row.user .cbw-bubble { background: var(--cbw-accent); border: none; color: #fff; border-radius: 14px; }
-.cbw-text { white-space: pre-wrap; word-wrap: break-word; overflow-x: auto; }
+.cbw-text { white-space: pre-wrap; word-wrap: break-word; overflow-x: auto; overflow-y: hidden; }
 .cbw-text p { margin: 0 0 6px; }
 .cbw-text p:last-child { margin-bottom: 0; }
 .cbw-text h1, .cbw-text h2, .cbw-text h3, .cbw-text h4, .cbw-text h5, .cbw-text h6 { margin: 8px 0 6px; line-height: 1.3; font-weight: 700; }
@@ -412,7 +412,6 @@
 .cbw-panel.dark-theme .cbw-row.user.out-context .cbw-bubble::after { box-shadow: 0 0 0 2px var(--cbw-accent); }
 
 /* Math - prevent overflow */
-.cbw-text .cbw-math { display: inline-block; max-width: 100%; overflow-x: auto; overflow-y: hidden; }
 .cbw-math[data-display="1"] { display: block; width: 100%; overflow-x: auto; overflow-y: hidden; padding: 4px 0; margin: 4px 0; }
 .katex { max-width: 100%; }
 .katex-display { max-width: 100%; }
