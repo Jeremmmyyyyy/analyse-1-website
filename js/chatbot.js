@@ -398,6 +398,11 @@
 .cbw-copybtn:hover { background: #4b5563; }
 .cbw-text blockquote { margin: 8px 0; padding: 0 0 0 12px; border-left: 3px solid #d1d5db; opacity: .85; font-style: italic; }
 .cbw-row.user .cbw-text blockquote { border-left-color: rgba(255,255,255,0.4); }
+
+/* Context Banner */
+.cbw-context-banner { background: #f3f4f6; color: #4b5563; padding: 8px 12px; font-size: 12px; border-bottom: 1px solid #e5e7eb; display: none; align-items: center; justify-content: center; gap: 8px; flex-shrink: 0; line-height: 1.3; }
+.cbw-context-banner svg { flex-shrink: 0; color: var(--cbw-accent); }
+.cbw-panel.dark-theme .cbw-context-banner { background: #1f2937; color: #9ca3af; border-color: #374151; }
  
 /* Context Visuals */
 .cbw-bubble { position: relative; }
@@ -696,6 +701,67 @@
   const body = document.createElement("div");
   body.className = "cbw-body";
 
+  const contextBanner = document.createElement("div");
+  contextBanner.className = "cbw-context-banner";
+  body.appendChild(contextBanner);
+
+  function updateContextBanner() {
+    const pageName = new URLSearchParams(window.location.search).get('page');
+    const sectionName = getSectionName(topic);
+    
+    let parts = [];
+    if (pageName) {
+      let displayName = pageName;
+      // Try to find a more descriptive name in the sidebar
+      try {
+        const el = document.getElementById(pageName);
+        if (el) {
+          // Check for link text first
+          const link = el.querySelector('a');
+          const text = link ? link.textContent : el.textContent;
+          if (text && text.trim()) {
+            displayName = text.trim();
+          }
+        }
+      } catch (e) {}
+      parts.push(`Page: ${displayName}`);
+    }
+    if (sectionName) parts.push(`Chapter: ${sectionName}`);
+    
+    if (parts.length > 0) {
+      contextBanner.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <span>Contexte: ${parts.join(" | ")}</span>
+      `;
+      contextBanner.style.display = "flex";
+      typesetMath(contextBanner);
+    } else {
+      contextBanner.style.display = "none";
+    }
+  }
+
+  // Listen for URL changes to update banner
+  const _pushState = history.pushState;
+  history.pushState = function() {
+    _pushState.apply(history, arguments);
+    updateContextBanner();
+  };
+  
+  const _replaceState = history.replaceState;
+  history.replaceState = function() {
+    _replaceState.apply(history, arguments);
+    updateContextBanner();
+  };
+
+  window.addEventListener('popstate', updateContextBanner);
+  window.addEventListener('hashchange', updateContextBanner);
+
   const messagesEl = document.createElement("div"); messagesEl.className = "cbw-messages";
 
   const inputArea = document.createElement("div"); inputArea.className = "cbw-input-area";
@@ -928,6 +994,18 @@
     }
   };
 
+  // Helper to find section name from ID
+  function getSectionName(topicId) {
+    if (!topicId) return null;
+    for (const chapter in COURSE_STRUCTURE) {
+      const sections = COURSE_STRUCTURE[chapter];
+      for (const section in sections) {
+        if (sections[section] === topicId) return section;
+      }
+    }
+    return topicId;
+  }
+
   // Populate topic list - Two-level hierarchy
   const topicListEl = topicModal.querySelector('.cbw-topic-list');
   let currentChapter = null;
@@ -971,6 +1049,7 @@
       document.getElementById('cbw-topic-display').innerHTML = '';
       document.getElementById('cbw-topic-display').appendChild(document.createTextNode('(No topic)'));
       hideTopicModal();
+      updateContextBanner();
     });
     topicListEl.appendChild(noTopicItem);
     
@@ -1021,6 +1100,7 @@
         document.getElementById('cbw-topic-display').appendChild(displayContainer);
         typesetMath(document.getElementById('cbw-topic-display'));
         hideTopicModal();
+        updateContextBanner();
       });
       topicListEl.appendChild(item);
     });
@@ -1047,6 +1127,7 @@
     applyFullscreen(startFullscreen);
     applyTheme();
     document.getElementById('cbw-topic-display').textContent = topic || "(No topic)";
+    updateContextBanner();
   };
   if (document.readyState === "complete" || document.readyState === "interactive") onReady(); else document.addEventListener("DOMContentLoaded", onReady);
 
@@ -1335,6 +1416,9 @@
     // Extract course name from section (the display text is now the section name, send it directly)
     const topicToSend = topic || undefined;
 
+    // Get page name from URL
+    const pageName = new URLSearchParams(window.location.search).get('page') || undefined;
+
     // Get Sciper
     const token = getToken();
     const userData = token ? decodeJWT(token) : null;
@@ -1350,6 +1434,7 @@
       // fd.append('message', messageText); // Removed to avoid duplication
       fd.append('sessionId', sessionId);
       if (topicToSend) fd.append('topic', topicToSend);
+      if (pageName) fd.append('page', pageName);
       if (sciper) fd.append('sciper', sciper);
       fd.append('answer', answerMode);
       try { fd.append('messages', JSON.stringify(messagesToSend)); } catch {}
@@ -1360,7 +1445,7 @@
       };
     } else {
       return {
-        body: JSON.stringify({ sessionId, topic: topicToSend, answer: answerMode, messages: messagesToSend, sciper }),
+        body: JSON.stringify({ sessionId, topic: topicToSend, page: pageName, answer: answerMode, messages: messagesToSend, sciper }),
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       };
     }
