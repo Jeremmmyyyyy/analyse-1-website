@@ -29,10 +29,16 @@ const questionCardTemplate = (question) => {
                             ${question.student_liked ? '<div class="icon-badge liked"></div>' : ''}
                         </div>
                     ` : ''}
-                    ${question.assistant_answers > 0 ? `
-                        <div class="answer-icon assistant-icon" title="Réponse d'assistant">
-                            ${question.assistant_accepted ? '<div class="icon-badge accepted"></div>' : ''}
-                            ${question.assistant_liked ? '<div class="icon-badge liked"></div>' : ''}
+                    ${question.super_assistant_answers > 0 ? `
+                        <div class="answer-icon assistant-icon" title="Réponse de super assistant">
+                            ${question.super_assistant_accepted ? '<div class="icon-badge accepted"></div>' : ''}
+                            ${question.super_assistant_liked ? '<div class="icon-badge liked"></div>' : ''}
+                        </div>
+                    ` : ''}
+                    ${question.normal_assistant_answers > 0 ? `
+                        <div class="answer-icon assistant-icon normal" title="Réponse d'assistant">
+                            ${question.normal_assistant_accepted ? '<div class="icon-badge accepted"></div>' : ''}
+                            ${question.normal_assistant_liked ? '<div class="icon-badge liked"></div>' : ''}
                         </div>
                     ` : ''}
                     ${question.llm_answers > 0 ? `
