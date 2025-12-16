@@ -416,6 +416,16 @@
 .cbw-panel.dark-theme .cbw-row.user.in-context .cbw-bubble::after,
 .cbw-panel.dark-theme .cbw-row.user.out-context .cbw-bubble::after { box-shadow: 0 0 0 2px var(--cbw-accent); }
 
+/* Toggle Switch */
+.cbw-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; font-size: 12px; color: #6b7280; font-weight: 600; margin-right: auto; }
+.cbw-toggle input { display: none; }
+.cbw-toggle-track { width: 32px; height: 18px; background: #e5e7eb; border-radius: 9px; position: relative; transition: all .2s; flex-shrink: 0; }
+.cbw-toggle-thumb { width: 14px; height: 14px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: all .2s; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+.cbw-toggle input:checked ~ .cbw-toggle-track { background: var(--cbw-accent); }
+.cbw-toggle input:checked ~ .cbw-toggle-track .cbw-toggle-thumb { transform: translateX(14px); }
+.cbw-panel.dark-theme .cbw-toggle { color: #9ca3af; }
+.cbw-panel.dark-theme .cbw-toggle-track { background: #374151; }
+
 /* Math - prevent overflow */
 .cbw-math[data-display="1"] { display: block; width: 100%; overflow-x: auto; overflow-y: hidden; padding: 4px 0; margin: 4px 0; }
 .katex { max-width: 100%; }
@@ -619,6 +629,15 @@
 .cbw-panel.dark-theme .cbw-time { color: rgba(243, 244, 246, 0.5); }
 .cbw-panel.dark-theme .cbw-dots span { background: #6b7280; }
 
+/* Feedback buttons */
+.cbw-feedback { display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end; }
+.cbw-feedback-btn { background: transparent; border: 1px solid #e5e7eb; border-radius: 4px; padding: 4px 8px; cursor: pointer; color: #6b7280; display: flex; align-items: center; gap: 4px; font-size: 12px; transition: all 0.2s; }
+.cbw-feedback-btn:hover { background: #f3f4f6; color: #374151; border-color: #d1d5db; }
+.cbw-feedback-btn.active { background: #e5e7eb; color: #111827; border-color: #9ca3af; }
+.cbw-panel.dark-theme .cbw-feedback-btn { border-color: #4b5563; color: #9ca3af; }
+.cbw-panel.dark-theme .cbw-feedback-btn:hover { background: #374151; color: #f3f4f6; border-color: #6b7280; }
+.cbw-panel.dark-theme .cbw-feedback-btn.active { background: #4b5563; color: #f3f4f6; border-color: #9ca3af; }
+
 @media (max-width: 760px) { .cbw-title { display: none; } }
 @media (max-width: 900px) { .cbw-panel:not(.fullscreen) { width: min(96vw, 400px); height: min(80vh, 70vh); } .cbw-bubble { max-width: 88%; font-size: 14px; padding: 10px 12px; } }
   `;
@@ -642,11 +661,7 @@
   const header = document.createElement("div");
   header.className = "cbw-header";
 
-  const titleEl = document.createElement("div");
-  titleEl.className = "cbw-title";
-  titleEl.textContent = cfg.title;
-
-  // No header controls
+  // Title removed to make space
 
   // Right side actions: expand + close
   const expandBtn = document.createElement("button");
@@ -690,7 +705,36 @@
     updateThemeIcon();
   });
 
-  header.appendChild(titleEl);
+  // Answer Mode Toggle
+  const toggleLabel = document.createElement("label");
+  toggleLabel.className = "cbw-toggle";
+  toggleLabel.title = "Toggle answer mode";
+  
+  const toggleInput = document.createElement("input");
+  toggleInput.type = "checkbox";
+  toggleInput.checked = answerMode === "full";
+  toggleInput.addEventListener("change", () => {
+    setAnswer(toggleInput.checked ? "full" : "hints");
+  });
+
+  const toggleTrack = document.createElement("div");
+  toggleTrack.className = "cbw-toggle-track";
+  const toggleThumb = document.createElement("div");
+  toggleThumb.className = "cbw-toggle-thumb";
+  toggleTrack.appendChild(toggleThumb);
+
+  const textHint = document.createElement("span");
+  textHint.textContent = "Hints";
+  
+  const textFull = document.createElement("span");
+  textFull.textContent = "Full";
+
+  toggleLabel.appendChild(toggleInput);
+  toggleLabel.appendChild(textHint);
+  toggleLabel.appendChild(toggleTrack);
+  toggleLabel.appendChild(textFull);
+
+  header.appendChild(toggleLabel);
   const spacer = document.createElement("div"); spacer.className = "cbw-spacer"; header.appendChild(spacer);
   header.appendChild(infoBtn);
   header.appendChild(resetBtn);
@@ -808,23 +852,6 @@
 
   panel.appendChild(header);
   panel.appendChild(body);
-
-  // Modal for choosing answer style on send
-  const modalBackdrop = document.createElement('div');
-  modalBackdrop.className = 'cbw-modal-backdrop';
-  const modal = document.createElement('div');
-  modal.className = 'cbw-modal';
-  modal.innerHTML = `
-    <h3>Choose answer style</h3>
-    <p>Would you like hints or the full answer?</p>
-    <div class="cbw-modal-actions">
-      <button type="button" class="cbw-choice green" data-choice="hints">Hints</button>
-      <button type="button" class="cbw-choice red" data-choice="full">Full answer</button>
-    </div>
-    <button type="button" class="cbw-cancel">Cancel</button>
-  `;
-  modalBackdrop.appendChild(modal);
-  panel.appendChild(modalBackdrop);
 
   // Modal for topic selection
   const topicModalBackdrop = document.createElement('div');
@@ -1247,19 +1274,15 @@
   function formatTime(ts) { try { return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); } catch { return ""; } }
   function renderEmptyIfNeeded() {
     if (messages.length === 0 && !isLoading) {
-      if (cfg.username) {
-        const greeting = `Hello ${cfg.username}`;
-        const botMsg = { id: uid(), text: greeting, isUser: false, ts: Date.now() };
-        messages.push(botMsg);
-        appendMessage(botMsg.text, false, botMsg.ts);
-      } else {
-        const empty = document.createElement("div"); empty.className = "cbw-empty"; empty.textContent = "Start a conversation…"; messagesEl.appendChild(empty);
-      }
+      const greeting = "Hello je suis bot-afogo je peux répondre à tes questions d'analyse ! N'oublie pas de consulter les informations (bouton ℹ️) si tu as des questions sur l'utilisation du chat.";
+      const botMsg = { id: uid(), text: greeting, isUser: false, ts: Date.now() };
+      messages.push(botMsg);
+      appendMessage(botMsg.text, false, botMsg.ts, [], null, null);
     }
   }
   function clearEmpty() { messagesEl.querySelectorAll(".cbw-empty").forEach(n => n.remove()); }
 
-  function appendMessage(text, isUser, ts, atts = []) {
+  function appendMessage(text, isUser, ts, atts = [], mode = null, msgId = null) {
     clearEmpty();
     const row = document.createElement("div"); row.className = "cbw-row " + (isUser ? "user" : "bot");
     const bubble = document.createElement("div"); bubble.className = "cbw-bubble";
@@ -1279,7 +1302,41 @@
       bubble.appendChild(cont);
     }
 
-    if (cfg.showTimestamps) { const time = document.createElement("div"); time.className = "cbw-time"; time.textContent = formatTime(ts); bubble.appendChild(time); }
+    const showTime = cfg.showTimestamps;
+    const showMode = mode && !isUser;
+    if (showTime || showMode) {
+      const meta = document.createElement("div"); meta.className = "cbw-time";
+      const parts = [];
+      if (showTime) parts.push(formatTime(ts));
+      if (showMode) parts.push(mode === "full" ? "Full" : "Hint");
+      meta.textContent = parts.join(" · ");
+      bubble.appendChild(meta);
+    }
+
+    if (!isUser && msgId) {
+      // Only show feedback on the last bot message
+      messagesEl.querySelectorAll('.cbw-feedback').forEach(el => el.remove());
+
+      const feedback = document.createElement("div");
+      feedback.className = "cbw-feedback";
+      
+      const upBtn = document.createElement("button");
+      upBtn.className = "cbw-feedback-btn";
+      upBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>`;
+      upBtn.title = "Helpful";
+      upBtn.onclick = () => handleFeedback(msgId, 'up', upBtn, downBtn);
+
+      const downBtn = document.createElement("button");
+      downBtn.className = "cbw-feedback-btn";
+      downBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>`;
+      downBtn.title = "Not helpful";
+      downBtn.onclick = () => handleFeedback(msgId, 'down', downBtn, upBtn);
+
+      feedback.appendChild(upBtn);
+      feedback.appendChild(downBtn);
+      bubble.appendChild(feedback);
+    }
+    
     row.appendChild(bubble); messagesEl.appendChild(row); scrollToBottom(); updateContextVisuals();
     // Enhance after attached to DOM to avoid timing issues
     const contentNode = bubble.querySelector('.cbw-text');
@@ -1288,6 +1345,32 @@
       // Run math typesetting on next frame to ensure scripts/styles are ready
       requestAnimationFrame(() => typesetMath(contentNode));
     }
+  }
+
+  function handleFeedback(msgId, type, btn, otherBtn) {
+    const token = getToken();
+    const userData = token ? decodeJWT(token) : null;
+    const sciper = userData ? userData.sciper : undefined;
+
+    const isRemoving = btn.classList.contains('active');
+
+    if (isRemoving) {
+      btn.classList.remove('active');
+    } else {
+      btn.classList.add('active');
+      otherBtn.classList.remove('active');
+    }
+
+    fetch('https://botafogo.epfl.ch/n8n/webhook/dc7a2345-701f-4d1a-8234-28705ee40457', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        msgId,
+        sessionId,
+        sciper,
+        liked: type === 'up'
+      })
+    }).catch(err => console.error('Feedback error', err));
   }
   function appendLoading() { clearEmpty(); const row = document.createElement("div"); row.className = "cbw-row bot"; const bub = document.createElement("div"); bub.className = "cbw-bubble loading"; bub.innerHTML = `<div class="cbw-dots"><span></span><span></span><span></span></div>`; row.appendChild(bub); messagesEl.appendChild(row); return row; }
 
@@ -1361,37 +1444,6 @@
   // Initial empty state
   renderEmptyIfNeeded();
 
-  // Modal logic
-  let isChoosing = false;
-  function showAnswerModal(onChoice) {
-    if (isChoosing) return;
-    isChoosing = true;
-    modalBackdrop.style.display = 'flex';
-    const btnHints = modal.querySelector('[data-choice="hints"]');
-    const btnFull = modal.querySelector('[data-choice="full"]');
-    const btnCancel = modal.querySelector('.cbw-cancel');
-    const onHints = () => { hideAnswerModal(); off(); onChoice('hints'); };
-    const onFull = () => { hideAnswerModal(); off(); onChoice('full'); };
-    const onCancel = () => { hideAnswerModal(); off(); };
-    let armed = false;
-    requestAnimationFrame(() => { armed = true; btnHints?.focus(); });
-    const onKey = (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) { if (!armed) return; e.preventDefault(); onHints(); }
-      else if (e.key === 'Escape') { e.preventDefault(); onCancel(); }
-    };
-    function off(){
-      btnHints?.removeEventListener('click', onHints);
-      btnFull?.removeEventListener('click', onFull);
-      btnCancel?.removeEventListener('click', onCancel);
-      document.removeEventListener('keydown', onKey, { capture: true });
-    }
-    btnHints?.addEventListener('click', onHints);
-    btnFull?.addEventListener('click', onFull);
-    btnCancel?.addEventListener('click', onCancel);
-    document.addEventListener('keydown', onKey, { capture: true });
-  }
-  function hideAnswerModal(){ modalBackdrop.style.display = 'none'; isChoosing = false; }
-
   // Safer JSON parsing
   async function safeJson(res) {
     const ct = res.headers.get("content-type") || "";
@@ -1451,19 +1503,17 @@
     }
   }
 
-  // Send message with confirmation popup for answer style
+  // Send message
   function sendMessage() {
-    if (isLoading || isChoosing) return;
+    if (isLoading) return;
     const raw = textarea.value.trim();
     if (!raw && attachments.length === 0) return;
-    showAnswerModal(async (choice) => {
-      setAnswer(choice);
-      await performSend(raw);
-    });
+    performSend(raw);
   }
 
   async function performSend(raw){
     if (isLoading) return;
+    const currentMode = answerMode;
     // push user message
     textarea.value = ""; autosize();
     const userAtts = attachments.map(a => {
@@ -1495,17 +1545,17 @@
         let msg = `Error ${res.status}. ${extractReply(data)}`;
         if (res.status === 413) msg = 'Server rejected the request (too large). Images were compressed, but may still be too big.';
         const botMsg = { id: uid(), text: msg, isUser: false, ts: Date.now() };
-        messages.push(botMsg); appendMessage(botMsg.text, false, botMsg.ts);
+        messages.push(botMsg); appendMessage(botMsg.text, false, botMsg.ts, [], null, botMsg.id);
       } else {
         const reply = extractReply(data);
-        const botMsg = { id: uid(), text: reply, isUser: false, ts: Date.now() };
-        messages.push(botMsg); appendMessage(botMsg.text, false, botMsg.ts);
+        const botMsg = { id: uid(), text: reply, isUser: false, ts: Date.now(), mode: currentMode };
+        messages.push(botMsg); appendMessage(botMsg.text, false, botMsg.ts, [], currentMode, botMsg.id);
       }
     } catch (err) {
       console.error(err);
       loadingNode.remove();
       const botMsg = { id: uid(), text: 'Network error. Please try again.', isUser: false, ts: Date.now() };
-      messages.push(botMsg); appendMessage(botMsg.text, false, botMsg.ts);
+      messages.push(botMsg); appendMessage(botMsg.text, false, botMsg.ts, [], null, botMsg.id);
     } finally {
       // cleanup attachments after send
       while (attachments.length) { const a = attachments.pop(); if (a?.url) URL.revokeObjectURL(a.url); }
@@ -1546,6 +1596,14 @@
         <div class="cbw-info-item">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
           <span>En cas de problème ou de doute, veuillez contacter le professeur ou les assistants.</span>
+        </div>
+        <div class="cbw-info-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="6" width="20" height="12" rx="6" ry="6"/><circle cx="8" cy="12" r="2"/></svg>
+          <span>Utilisez le sélecteur en haut pour choisir entre "Hints" (indices) et "Full" (réponse complète).</span>
+        </div>
+        <div class="cbw-info-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>
+          <span>Modèles utilisés : gpt-oss 120B et qwen-VL-70B, hébergés à l'EPFL. Vos questions restent privées et ne sont pas envoyées dans le cloud.</span>
         </div>
         <div class="cbw-info-item" style="flex-direction:column; gap:8px;">
           <span><strong>Mémoire du chatbot :</strong></span>
