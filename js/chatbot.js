@@ -724,10 +724,10 @@
   toggleTrack.appendChild(toggleThumb);
 
   const textHint = document.createElement("span");
-  textHint.textContent = "Hints";
+  textHint.textContent = "Concis";
   
   const textFull = document.createElement("span");
-  textFull.textContent = "Full";
+  textFull.textContent = "Bavard";
 
   toggleLabel.appendChild(toggleInput);
   toggleLabel.appendChild(textHint);
@@ -1599,7 +1599,7 @@
         </div>
         <div class="cbw-info-item">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="6" width="20" height="12" rx="6" ry="6"/><circle cx="8" cy="12" r="2"/></svg>
-          <span>Utilisez le sélecteur en haut pour choisir entre "Hints" (indices) et "Full" (réponse complète).</span>
+          <span>Utilisez le sélecteur en haut pour choisir entre "Concis" (indices) et "Bavard" (réponse complète).</span>
         </div>
         <div class="cbw-info-item">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>
