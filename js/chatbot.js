@@ -1605,6 +1605,10 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>
           <span>Modèles utilisés : gpt-oss 120B et qwen-VL-70B, hébergés à l'EPFL. Vos questions restent privées et ne sont pas envoyées dans le cloud.</span>
         </div>
+        <div class="cbw-info-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+          <span>Merci de noter chaque réponse (👍/👎) pour nous aider à améliorer le modèle.</span>
+        </div>
         <div class="cbw-info-item" style="flex-direction:column; gap:8px;">
           <span><strong>Mémoire du chatbot :</strong></span>
           <div class="cbw-info-dot-row">
