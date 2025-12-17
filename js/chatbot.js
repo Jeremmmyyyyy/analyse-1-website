@@ -634,9 +634,26 @@
 .cbw-feedback-btn { background: transparent; border: 1px solid #e5e7eb; border-radius: 4px; padding: 4px 8px; cursor: pointer; color: #6b7280; display: flex; align-items: center; gap: 4px; font-size: 12px; transition: all 0.2s; }
 .cbw-feedback-btn:hover { background: #f3f4f6; color: #374151; border-color: #d1d5db; }
 .cbw-feedback-btn.active { background: #e5e7eb; color: #111827; border-color: #9ca3af; }
+
+/* Colorful Feedback */
+.cbw-feedback-btn.up:hover { color: #10b981; background: #ecfdf5; border-color: #a7f3d0; }
+.cbw-feedback-btn.up.active { color: #fff; background: #10b981; border-color: #059669; }
+.cbw-feedback-btn.down:hover { color: #ef4444; background: #fef2f2; border-color: #fecaca; }
+.cbw-feedback-btn.down.active { color: #fff; background: #ef4444; border-color: #dc2626; }
+
+/* Error Banner */
+.cbw-error-banner { background: #fee2e2; color: #b91c1c; padding: 8px 12px; font-size: 13px; border-radius: 8px; margin-bottom: 8px; display: none; animation: cbw-fade-in .3s ease; border: 1px solid #fca5a5; }
+
 .cbw-panel.dark-theme .cbw-feedback-btn { border-color: #4b5563; color: #9ca3af; }
 .cbw-panel.dark-theme .cbw-feedback-btn:hover { background: #374151; color: #f3f4f6; border-color: #6b7280; }
 .cbw-panel.dark-theme .cbw-feedback-btn.active { background: #4b5563; color: #f3f4f6; border-color: #9ca3af; }
+
+.cbw-panel.dark-theme .cbw-feedback-btn.up:hover { background: #064e3b; border-color: #059669; color: #34d399; }
+.cbw-panel.dark-theme .cbw-feedback-btn.up.active { background: #059669; border-color: #047857; color: #fff; }
+.cbw-panel.dark-theme .cbw-feedback-btn.down:hover { background: #7f1d1d; border-color: #991b1b; color: #fca5a5; }
+.cbw-panel.dark-theme .cbw-feedback-btn.down.active { background: #991b1b; border-color: #7f1d1d; color: #fff; }
+
+.cbw-panel.dark-theme .cbw-error-banner { background: #7f1d1d; color: #fecaca; border-color: #991b1b; }
 
 @media (max-width: 760px) { .cbw-title { display: none; } }
 @media (max-width: 900px) { .cbw-panel:not(.fullscreen) { width: min(96vw, 400px); height: min(80vh, 70vh); } .cbw-bubble { max-width: 88%; font-size: 14px; padding: 10px 12px; } }
@@ -820,6 +837,10 @@
 
   const fileList = document.createElement("div"); fileList.className = "cbw-filelist";
 
+  const errorBanner = document.createElement("div");
+  errorBanner.className = "cbw-error-banner";
+  errorBanner.textContent = "Donnez votre avis sur le message précédent avant de poser une nouvelle question !";
+
   const inputWrap = document.createElement("div"); inputWrap.className = "cbw-input";
 
   const actions = document.createElement("div"); actions.className = "cbw-actions";
@@ -844,6 +865,7 @@
 
   inputArea.appendChild(topicBtn);
   inputArea.appendChild(fileList);
+  inputArea.appendChild(errorBanner);
   inputArea.appendChild(inputWrap);
   inputArea.appendChild(hint);
 
@@ -1275,7 +1297,7 @@
   function renderEmptyIfNeeded() {
     if (messages.length === 0 && !isLoading) {
       const greeting = "Hello je suis bot-afogo je peux répondre à tes questions d'analyse ! N'oublie pas de consulter les informations (bouton ℹ️) si tu as des questions sur l'utilisation du chat.";
-      const botMsg = { id: uid(), text: greeting, isUser: false, ts: Date.now() };
+      const botMsg = { id: uid(), text: greeting, isUser: false, ts: Date.now(), rated: true };
       messages.push(botMsg);
       appendMessage(botMsg.text, false, botMsg.ts, [], null, null);
     }
@@ -1321,13 +1343,13 @@
       feedback.className = "cbw-feedback";
       
       const upBtn = document.createElement("button");
-      upBtn.className = "cbw-feedback-btn";
+      upBtn.className = "cbw-feedback-btn up";
       upBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>`;
       upBtn.title = "Helpful";
       upBtn.onclick = () => handleFeedback(msgId, 'up', upBtn, downBtn);
 
       const downBtn = document.createElement("button");
-      downBtn.className = "cbw-feedback-btn";
+      downBtn.className = "cbw-feedback-btn down";
       downBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>`;
       downBtn.title = "Not helpful";
       downBtn.onclick = () => handleFeedback(msgId, 'down', downBtn, upBtn);
@@ -1359,6 +1381,11 @@
     } else {
       btn.classList.add('active');
       otherBtn.classList.remove('active');
+      
+      // Mark as rated
+      const msg = messages.find(m => m.id === msgId);
+      if (msg) msg.rated = true;
+      errorBanner.style.display = 'none';
     }
 
     fetch('https://botafogo.epfl.ch/n8n/webhook/dc7a2345-701f-4d1a-8234-28705ee40457', {
@@ -1506,6 +1533,15 @@
   // Send message
   function sendMessage() {
     if (isLoading) return;
+
+    // Check if last bot message was rated
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg && !lastMsg.isUser && lastMsg.id && !lastMsg.rated) {
+       errorBanner.style.display = 'block';
+       return;
+    }
+    errorBanner.style.display = 'none';
+
     const raw = textarea.value.trim();
     if (!raw && attachments.length === 0) return;
     performSend(raw);
